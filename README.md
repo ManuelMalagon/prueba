@@ -1,5 +1,6 @@
 # prueba
 
+```mermaid
 erDiagram
     TRABAJADOR {
         int id_trabajador PK
@@ -105,3 +106,4 @@ erDiagram
     CENTRO_EDUCATIVO ||--o{ SOLICITUD_VISITA : "emite"
     
     SOLICITUD_VISITA ||--|{ DIAS_PREFERIBLES : "indica al menos un"
+```
