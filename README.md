@@ -4,107 +4,117 @@
 erDiagram
     TRABAJADOR {
         int id_trabajador PK
-        varchar nombre
-        varchar apellidos
-        varchar dni
+        string nombre
+        string apellidos
+        string dni UK
         date fecha_nacimiento
-        varchar direccion
+        string direccion
         date fecha_alta
-        enum categoria "Administrativo, Monitor, Veterinario"
-        varchar num_colegiado "Solo Veterinarios"
     }
-
-    DISPONIBILIDAD_MONITOR {
+    ADMINISTRATIVO {
         int id_trabajador PK, FK
-        enum dia_semana PK "Lunes a Viernes"
     }
-
+    MONITOR {
+        int id_trabajador PK, FK
+    }
+    VETERINARIO {
+        int id_trabajador PK, FK
+        string num_colegiado UK
+    }
+    MONITOR_DISPONIBILIDAD {
+        int id_monitor PK, FK
+        string dia_semana PK "CHECK lunes a viernes"
+    }
     RECINTO {
         int id_recinto PK
-        varchar nombre
-        varchar ubicacion
-        int capacidad_maxima
-        int capacidad_actual
+        string nombre
+        string ubicacion
+        int cap_maxima
+        string tipo_animal
+        boolean es_hospital
     }
-
     ANIMAL {
-        varchar codigo_registro PK "15 caracteres"
-        varchar especie
-        varchar raza
-        varchar nombre
+        int id_animal PK
+        string codigo_registro UK "CHAR(15)"
+        string especie
+        string raza "nullable"
+        string nombre
         int edad
-        enum estado_salud "sano, requiere atencion"
-        date fecha_fallecimiento "Opcional"
+        string estado_salud "SANO o REQUIERE_ATENCION"
+        date fecha_fallecimiento "nullable"
         int id_recinto FK
+    }
+    HISTORIAL_CLINICO {
+        int id_historial PK
+        int id_animal FK, UK
         int id_veterinario FK
     }
-
     INGRESO {
         int id_ingreso PK
-        varchar codigo_animal FK
-        date fecha_llegada
-        date fecha_salida
-        text medicacion_prescrita
+        int id_historial FK
+        int id_recinto_origen FK
+        date fecha_ingreso
+        date fecha_salida "nullable"
+        string medicacion
     }
-
     ADOPTANTE {
         int id_adoptante PK
-        varchar nombre
-        varchar apellidos
-        varchar dni
-        varchar direccion
+        string dni UK
+        string nombre
+        string apellidos
+        string direccion
         date fecha_nacimiento
-        varchar telefono_contacto
+        string telefono
     }
-
     ADOPCION {
         int id_adopcion PK
-        varchar codigo_animal FK
+        int id_animal FK
         int id_adoptante FK
         int id_administrativo FK
         date fecha_adopcion
         boolean activa
     }
-
     CENTRO_EDUCATIVO {
-        varchar codigo_centro PK "8 caracteres"
-        varchar nombre
-        varchar direccion
-        varchar profesor_nombre
-        varchar profesor_apellidos
-        varchar profesor_email
+        string codigo_centro PK "CHAR(8)"
+        string nombre
+        string direccion
+        string profesor_nombre
+        string profesor_apellidos
+        string profesor_email
     }
-
     SOLICITUD_VISITA {
         int id_solicitud PK
-        varchar codigo_centro FK
+        string codigo_centro FK
         int num_estudiantes
-        enum nivel_educativo "infantil, primaria, secundaria"
-        enum estado "pendiente, asignada, finalizada"
-        int id_monitor FK "Opcional inicialmente"
-        enum dia_asignado "Opcional inicialmente"
+        string nivel_educativo "INFANTIL, PRIMARIA, SECUNDARIA"
+        string estado "PENDIENTE, ASIGNADA, FINALIZADA"
     }
-
-    DIAS_PREFERIBLES {
+    SOLICITUD_DIAS {
         int id_solicitud PK, FK
-        enum dia_semana PK "Lunes a Viernes"
+        string dia_semana PK
+    }
+    ASIGNACION_VISITA {
+        int id_asignacion PK
+        int id_solicitud FK, UK
+        int id_monitor FK
+        string dia_asignado
     }
 
-    %% Relaciones (Cardinalidades)
-    TRABAJADOR ||--o{ DISPONIBILIDAD_MONITOR : "tiene disponibilidad (Monitor)"
-    TRABAJADOR ||--o{ ANIMAL : "cuida y supervisa (Veterinario)"
-    TRABAJADOR ||--o{ ADOPCION : "tramita y registra (Administrativo)"
-    TRABAJADOR ||--o{ SOLICITUD_VISITA : "es asignado a (Monitor)"
-    
-    RECINTO ||--o{ ANIMAL : "aloja físicamente"
-    
-    ANIMAL ||--o{ INGRESO : "genera historiales de"
-    ANIMAL ||--o| ADOPCION : "participa en (máximo 1 activa)"
-    
-    ADOPTANTE ||--o{ ADOPCION : "formaliza (máximo 5)"
-    
-    CENTRO_EDUCATIVO ||--o{ SOLICITUD_VISITA : "emite"
-    
-    SOLICITUD_VISITA ||--|{ DIAS_PREFERIBLES : "indica al menos un"
+    TRABAJADOR ||--o| ADMINISTRATIVO : "es"
+    TRABAJADOR ||--o| MONITOR : "es"
+    TRABAJADOR ||--o| VETERINARIO : "es"
+    MONITOR ||--o{ MONITOR_DISPONIBILIDAD : "tiene disponibilidad"
+    RECINTO ||--o{ ANIMAL : "aloja"
+    ANIMAL ||--o| HISTORIAL_CLINICO : "posee"
+    VETERINARIO ||--o{ HISTORIAL_CLINICO : "es responsable de"
+    HISTORIAL_CLINICO ||--o{ INGRESO : "registra"
+    RECINTO ||--o{ INGRESO : "es recinto origen de"
+    ANIMAL ||--o{ ADOPCION : "participa en"
+    ADOPTANTE ||--o{ ADOPCION : "realiza"
+    ADMINISTRATIVO ||--o{ ADOPCION : "gestiona"
+    CENTRO_EDUCATIVO ||--o{ SOLICITUD_VISITA : "solicita"
+    SOLICITUD_VISITA ||--|{ SOLICITUD_DIAS : "prefiere"
+    SOLICITUD_VISITA ||--o| ASIGNACION_VISITA : "recibe"
+    MONITOR ||--o{ ASIGNACION_VISITA : "ejecuta"
 ```
 
