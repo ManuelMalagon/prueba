@@ -2,108 +2,96 @@
 
 ```mermaid
 erDiagram
+    %% Entidades principales y sus atributos (sin claves foráneas)
     TRABAJADOR {
-        int id_trabajador PK
-        varchar nombre
-        varchar apellidos
-        varchar dni
-        date fecha_nacimiento
-        varchar direccion
-        date fecha_alta
-        enum categoria "Administrativo, Monitor, Veterinario"
-        varchar num_colegiado "Solo Veterinarios"
-    }
-
-    DISPONIBILIDAD_MONITOR {
-        int id_trabajador PK, FK
-        enum dia_semana PK "Lunes a Viernes"
-    }
-
-    RECINTO {
-        int id_recinto PK
-        varchar nombre
-        varchar ubicacion
-        int capacidad_maxima
-        int capacidad_actual
+        Id id_trabajador
+        Texto nombre
+        Texto apellidos
+        Documento dni
+        Fecha fecha_nacimiento
+        Texto direccion
+        Fecha fecha_alta
+        Categoria rol
+        Numero num_colegiado
     }
 
     ANIMAL {
-        varchar codigo_registro PK "15 caracteres"
-        varchar especie
-        varchar raza
-        varchar nombre
-        int edad
-        enum estado_salud "sano, requiere atencion"
-        date fecha_fallecimiento "Opcional"
-        int id_recinto FK
-        int id_veterinario FK
+        Codigo codigo_registro
+        Texto especie
+        Texto raza
+        Texto nombre
+        Numero edad
+        Estado estado_salud
+        Fecha fecha_fallecimiento
     }
 
-    INGRESO {
-        int id_ingreso PK
-        varchar codigo_animal FK
-        date fecha_llegada
-        date fecha_salida
-        text medicacion_prescrita
+    RECINTO {
+        Id id_recinto
+        Texto nombre
+        Ubicacion ubicacion
+        Numero capacidad_maxima
+        Numero capacidad_actual
     }
 
     ADOPTANTE {
-        int id_adoptante PK
-        varchar nombre
-        varchar apellidos
-        varchar dni
-        varchar direccion
-        date fecha_nacimiento
-        varchar telefono_contacto
-    }
-
-    ADOPCION {
-        int id_adopcion PK
-        varchar codigo_animal FK
-        int id_adoptante FK
-        int id_administrativo FK
-        date fecha_adopcion
-        boolean activa
+        Id id_adoptante
+        Texto nombre
+        Texto apellidos
+        Documento dni
+        Texto direccion
+        Fecha fecha_nacimiento
+        Telefono telefono_contacto
     }
 
     CENTRO_EDUCATIVO {
-        varchar codigo_centro PK "8 caracteres"
-        varchar nombre
-        varchar direccion
-        varchar profesor_nombre
-        varchar profesor_apellidos
-        varchar profesor_email
+        Codigo codigo_centro
+        Texto nombre
+        Texto direccion
+        Texto profesor_nombre
+        Texto profesor_apellidos
+        Email profesor_email
     }
 
-    SOLICITUD_VISITA {
-        int id_solicitud PK
-        varchar codigo_centro FK
-        int num_estudiantes
-        enum nivel_educativo "infantil, primaria, secundaria"
-        enum estado "pendiente, asignada, finalizada"
-        int id_monitor FK "Opcional inicialmente"
-        enum dia_asignado "Opcional inicialmente"
+    SOLICITUD {
+        Id id_solicitud
+        Numero num_estudiantes
+        Nivel nivel_educativo
+        Estado estado_visita
+        Dia dia_asignado
     }
 
-    DIAS_PREFERIBLES {
-        int id_solicitud PK, FK
-        enum dia_semana PK "Lunes a Viernes"
+    INGRESO_CLINICO {
+        Id id_ingreso
+        Fecha fecha_llegada
+        Fecha fecha_salida
+        Texto medicacion_prescrita
     }
 
-    %% Relaciones (Cardinalidades)
-    TRABAJADOR ||--o{ DISPONIBILIDAD_MONITOR : "tiene disponibilidad (Monitor)"
-    TRABAJADOR ||--o{ ANIMAL : "cuida y supervisa (Veterinario)"
-    TRABAJADOR ||--o{ ADOPCION : "tramita y registra (Administrativo)"
-    TRABAJADOR ||--o{ SOLICITUD_VISITA : "es asignado a (Monitor)"
+    ADOPCION {
+        Id id_adopcion
+        Fecha fecha_adopcion
+        Booleano activa
+    }
+
+    DIA_SEMANA {
+        Dia nombre_dia
+    }
+
+    %% Relaciones conceptuales de negocio
+    TRABAJADOR ||--o{ ANIMAL : "Veterinario atiende a"
+    TRABAJADOR ||--o{ SOLICITUD : "Monitor guía"
+    TRABAJADOR }o--o{ DIA_SEMANA : "Monitor está disponible en"
     
-    RECINTO ||--o{ ANIMAL : "aloja físicamente"
+    RECINTO ||--o{ ANIMAL : "aloja"
     
-    ANIMAL ||--o{ INGRESO : "genera historiales de"
-    ANIMAL ||--o| ADOPCION : "participa en (máximo 1 activa)"
+    ANIMAL ||--o{ INGRESO_CLINICO : "tiene historial de"
     
-    ADOPTANTE ||--o{ ADOPCION : "formaliza (máximo 5)"
+    %% Relación ternaria de adopción resuelta conceptualmente
+    ADOPTANTE ||--o{ ADOPCION : "solicita"
+    ANIMAL ||--o| ADOPCION : "protagoniza"
+    TRABAJADOR ||--o{ ADOPCION : "Administrativo gestiona"
     
-    CENTRO_EDUCATIVO ||--o{ SOLICITUD_VISITA : "emite"
-    
-    SOLICITUD_VISITA ||--|{ DIAS_PREFERIBLES : "indica al menos un"
+    CENTRO_EDUCATIVO ||--o{ SOLICITUD : "emite"
+    SOLICITUD }o--|{ DIA_SEMANA : "tiene preferencia por"
 ```
+
