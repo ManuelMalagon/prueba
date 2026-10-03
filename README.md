@@ -2,96 +2,109 @@
 
 ```mermaid
 erDiagram
-    %% Entidades principales y sus atributos (sin claves foráneas)
     TRABAJADOR {
-        Id id_trabajador
-        Texto nombre
-        Texto apellidos
-        Documento dni
-        Fecha fecha_nacimiento
-        Texto direccion
-        Fecha fecha_alta
-        Categoria rol
-        Numero num_colegiado
+        int id_trabajador PK
+        string nombre
+        string apellidos
+        string dni UK
+        date fecha_nacimiento
+        string direccion
+        date fecha_alta
+        string tipo_trabajador
     }
-
-    ANIMAL {
-        Codigo codigo_registro
-        Texto especie
-        Texto raza
-        Texto nombre
-        Numero edad
-        Estado estado_salud
-        Fecha fecha_fallecimiento
+    VETERINARIO {
+        int id_trabajador PK, FK
+        string num_colegiado
     }
-
+    MONITOR_DISPONIBILIDAD {
+        int id_monitor PK, FK
+        string dia_semana PK
+    }
     RECINTO {
-        Id id_recinto
-        Texto nombre
-        Ubicacion ubicacion
-        Numero capacidad_maxima
-        Numero capacidad_actual
+        int id_recinto PK
+        string nombre
+        string ubicacion
+        int cap_maxima
+        int cap_actual
     }
-
+    ANIMAL {
+        int id_animal PK
+        string codigo_registro UK
+        string especie
+        string raza
+        string nombre
+        int edad
+        string estado_salud
+        date fecha_fallecimiento
+        int id_recinto FK
+    }
+    HISTORIAL_CLINICO {
+        int id_historial PK
+        int id_animal FK
+        int id_veterinario FK
+    }
+    INGRESO {
+        int id_ingreso PK
+        int id_historial FK
+        date fecha_ingreso
+        date fecha_salida
+        string medicacion
+    }
     ADOPTANTE {
-        Id id_adoptante
-        Texto nombre
-        Texto apellidos
-        Documento dni
-        Texto direccion
-        Fecha fecha_nacimiento
-        Telefono telefono_contacto
+        int id_adoptante PK
+        string dni UK
+        string nombre
+        string apellidos
+        string direccion
+        date fecha_nacimiento
+        string telefono
     }
-
-    CENTRO_EDUCATIVO {
-        Codigo codigo_centro
-        Texto nombre
-        Texto direccion
-        Texto profesor_nombre
-        Texto profesor_apellidos
-        Email profesor_email
-    }
-
-    SOLICITUD {
-        Id id_solicitud
-        Numero num_estudiantes
-        Nivel nivel_educativo
-        Estado estado_visita
-        Dia dia_asignado
-    }
-
-    INGRESO_CLINICO {
-        Id id_ingreso
-        Fecha fecha_llegada
-        Fecha fecha_salida
-        Texto medicacion_prescrita
-    }
-
     ADOPCION {
-        Id id_adopcion
-        Fecha fecha_adopcion
-        Booleano activa
+        int id_adopcion PK
+        int id_animal FK
+        int id_adoptante FK
+        int id_administrativo FK
+        date fecha_adopcion
+        boolean estado_activa
+    }
+    CENTRO_EDUCATIVO {
+        string codigo_centro PK
+        string nombre
+        string direccion
+        string profesor_nombre
+        string profesor_apellidos
+        string profesor_email
+    }
+    SOLICITUD_VISITA {
+        int id_solicitud PK
+        string codigo_centro FK
+        int num_estudiantes
+        string nivel_educativo
+        boolean estado_finalizada
+    }
+    SOLICITUD_DIAS {
+        int id_solicitud PK, FK
+        string dia_semana PK
+    }
+    ASIGNACION_VISITA {
+        int id_asignacion PK
+        int id_solicitud FK
+        int id_monitor FK
+        string dia_asignado
     }
 
-    DIA_SEMANA {
-        Dia nombre_dia
-    }
-
-    %% Relaciones conceptuales de negocio
-    TRABAJADOR ||--o{ ANIMAL : "Veterinario atiende a"
-    TRABAJADOR ||--o{ SOLICITUD : "Monitor guía"
-    TRABAJADOR }o--o{ DIA_SEMANA : "Monitor está disponible en"
-    
+    TRABAJADOR ||--o| VETERINARIO : "es"
+    TRABAJADOR ||--o{ MONITOR_DISPONIBILIDAD : "tiene disponibilidad"
     RECINTO ||--o{ ANIMAL : "aloja"
-    
-    ANIMAL ||--o{ INGRESO_CLINICO : "tiene historial de"
-    
-    %% Relación ternaria de adopción resuelta conceptualmente
-    ADOPTANTE ||--o{ ADOPCION : "solicita"
-    ANIMAL ||--o| ADOPCION : "protagoniza"
-    TRABAJADOR ||--o{ ADOPCION : "Administrativo gestiona"
-    
-    CENTRO_EDUCATIVO ||--o{ SOLICITUD : "emite"
-    SOLICITUD }o--|{ DIA_SEMANA : "tiene preferencia por"
+    ANIMAL ||--o| HISTORIAL_CLINICO : "posee"
+    VETERINARIO ||--o{ HISTORIAL_CLINICO : "es responsable de"
+    HISTORIAL_CLINICO ||--o{ INGRESO : "registra"
+    ANIMAL ||--o{ ADOPCION : "participa en"
+    ADOPTANTE ||--o{ ADOPCION : "realiza"
+    TRABAJADOR ||--o{ ADOPCION : "gestiona"
+    CENTRO_EDUCATIVO ||--o{ SOLICITUD_VISITA : "solicita"
+    SOLICITUD_VISITA ||--|{ SOLICITUD_DIAS : "prefiere"
+    SOLICITUD_VISITA ||--o| ASIGNACION_VISITA : "recibe"
+    TRABAJADOR ||--o{ ASIGNACION_VISITA : "ejecuta"
 ```
 
